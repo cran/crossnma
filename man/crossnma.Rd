@@ -6,44 +6,67 @@
 \usage{
 crossnma(
   x,
+  inits = NULL,
   n.adapt = 1000,
   n.burnin = floor(n.iter/2),
-  n.iter = 10000,
-  thin = 1,
+  n.iter = 2000,
+  n.thin = max(1, floor((n.iter - n.burnin)/1000)),
   n.chains = 2,
-  quiet = TRUE,
-  monitor = NULL
+  monitor = NULL,
+  level.ma = x$level.ma,
+  backtransf = x$backtransf,
+  quiet = TRUE
 )
 }
 \arguments{
 \item{x}{An object produced by \code{\link{crossnma.model}}.}
 
-\item{n.adapt}{Number of adaptations for the MCMC chains. Default
-is 1000.}
+\item{inits}{A list of lists with \code{n.chains} elements; each
+element contains initial values for each model parameter or a
+function that generates starting values. Default is different
+numbers in \code{.RNG.seed} and \code{.RNG.name =
+"base::Mersenne-Twister"}.}
 
-\item{n.burnin}{Number of burnin iterations for the MCMC chains.}
+\item{n.adapt}{Number of adaptations for the MCMC chains.}
 
-\item{n.iter}{Number of iterations for the MCMC chains.}
+\item{n.burnin}{Number of burnin iterations for the MCMC
+chains. Default is \code{n.iter / 2} which discards the first
+half of the iterations.}
 
-\item{thin}{Number of thinning for the MCMC chains. Default is 1.}
+\item{n.iter}{Number of iterations to run each MCMC chain.}
 
-\item{n.chains}{Number of MCMC chains. Default is 2.}
+\item{n.thin}{Number of thinning for the MCMC chains. Default is
+max(1, floor((n.iter - n.burnin) / 1000)), that is only thinning
+if there are more than 2000 iterations.}
 
-\item{quiet}{A logical passed on to
-\code{\link[rjags]{jags.model}}.}
+\item{n.chains}{Number of MCMC chains.}
 
-\item{monitor}{A vector of additional parameters to
-monitor. Default is NULL.}
+\item{monitor}{A character vector of the names of the parameters to
+be monitored. Basic parameters (depends on the analysis) will be
+automatically monitored and only additional parameters need to be
+specified.}
+
+\item{level.ma}{The level used to calculate credible intervals for
+network estimates.}
+
+\item{backtransf}{A logical indicating whether results should be
+back transformed in printouts. If \code{backtransf = TRUE},
+results for \code{sm = "OR"} are presented as odds ratios rather
+than log odds ratios, for example.}
+
+\item{quiet}{A logical passed on to \code{\link{jags.model}}.}
 }
 \value{
 An object of class \code{crossnma} which is a list containing the
 following components:
-\item{samples}{The MCMC samples produced by running the JAGS
-  model.}
+\item{jagsfit}{An "rjags" object produced when rjags package used
+  to run the JAGS model.}
 \item{model}{The \code{crossnma.model} object obtained from
   \code{\link{crossnma.model}} which was used to run JAGS.}
 \item{trt.key}{A table of treatment names and their correspondence
   to integers used in the JAGS model.}
+\item{inits, n.adapt, n.burnin, n.iter}{As defined above.}
+\item{n.thin, n.chains}{As defined above.}
 \item{call}{Function call.}
 \item{version}{Version of R package \bold{crossnma} used to create
   object.}
@@ -54,12 +77,13 @@ This function takes the JAGS model from an object produced by
 rjags package.
 }
 \examples{
+\dontrun{
 # We conduct a network meta-analysis assuming a random-effects
 # model.
 # The data comes from randomized-controlled trials and
 # non-randomized studies (combined naively)
 head(ipddata) # participant-level data
-head(stddata) # study-level data
+stddata # study-level data
 
 # Create a JAGS model
 mod <- crossnma.model(treat, id, relapse, n, design,
@@ -67,14 +91,13 @@ mod <- crossnma.model(treat, id, relapse, n, design,
   reference = "A", trt.effect = "random", method.bias = "naive")
 
 # Fit JAGS model
-# (suppress warning 'Adaptation incomplete' due to n.adapt = 20)
-fit <-
-  suppressWarnings(crossnma(mod, n.adapt = 20,
-    n.iter = 50, thin = 1, n.chains = 3))
+set.seed(1909)
+fit <- crossnma(mod)
 
 # Display the output
 summary(fit)
 plot(fit)
+}
 
 }
 \seealso{
@@ -83,5 +106,5 @@ plot(fit)
 }
 \author{
 Tasnim Hamza \email{tasnim.hamza@ispm.unibe.ch}, Guido
-  Schwarzer \email{sc@imbi.uni-freiburg.de}
+  Schwarzer \email{guido.schwarzer@uniklinik-freiburg.de}
 }

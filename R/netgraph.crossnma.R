@@ -1,5 +1,5 @@
 #' Produce a network plot
-#' 
+#'
 #' @description
 #' Create a network plot of the cross network meta-analysis or
 #' meta-regression
@@ -24,46 +24,40 @@
 #'   plots).}
 #'
 #' @author Tasnim Hamza \email{tasnim.hamza@@ispm.unibe.ch}
-#' 
+#'
 #' @seealso \code{\link[netmeta]{netgraph.netmeta}}
 #'
 #' @examples
+#' \dontrun{
 #' # We conduct a network meta-analysis assuming a random-effects
 #' # model.
 #' # The data comes from randomized-controlled trials and
 #' # non-randomized studies (combined naively)
 #' head(ipddata) # participant-level data
-#' head(stddata) # study-level data
-#' 
+#' stddata # study-level data
+#'
 #' # Create a JAGS model
 #' mod <- crossnma.model(treat, id, relapse, n, design,
 #'   prt.data = ipddata, std.data = stddata,
 #'   reference = "A", trt.effect = "random", method.bias = "naive")
 #'
 #' # Fit JAGS model
-#' # (suppress warning 'Adaptation incomplete' due to n.adapt = 20)
-#' fit <-
-#'   suppressWarnings(crossnma(mod, n.adapt = 20,
-#'     n.iter = 50, thin = 1, n.chains = 3))
+#' set.seed(1909)
+#' fit <- crossnma(mod)
 #'
 #' # Create network plot
-#' netgraph(fit)
+#' netgraph(fit, plastic = FALSE, cex.points = 7, adj = 0.5)
+#' }
 #'
 #'@method netgraph crossnma
 #'@export
 
 
 netgraph.crossnma <- function(x, ...) {
-
+  
   chkclass(x, "crossnma")
   ##
-  ## Bind variables to function
-  trt <- r <- study <- NULL
+  pw <- crossnma.model2pairwise(x$model)
   ##
-  dat <-
-    suppressWarnings(pairwise(treat = trt, event = r, n = n, studlab = study,
-                              data = x$model$all.data.ad,
-                              sm = "OR", warn = FALSE))
-  ##
-  netgraph(suppressWarnings(netmeta(dat, warn = FALSE)), ...)
+  netgraph(suppressWarnings(netmeta(pw, warn = FALSE)), ...)
 }

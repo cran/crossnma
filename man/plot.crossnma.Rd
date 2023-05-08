@@ -20,12 +20,13 @@ Produces a separate plot for each parameter in the JAGS model. Each
 plot shows iterations vs sampled values.
 }
 \examples{
+\dontrun{
 # We conduct a network meta-analysis assuming a random-effects
 # model.
 # The data comes from randomized-controlled trials and
 # non-randomized studies (combined naively)
 head(ipddata) # participant-level data
-head(stddata) # study-level data
+stddata # study-level data
 
 # Create a JAGS model
 mod <- crossnma.model(treat, id, relapse, n, design,
@@ -33,13 +34,12 @@ mod <- crossnma.model(treat, id, relapse, n, design,
   reference = "A", trt.effect = "random", method.bias = "naive")
 
 # Fit JAGS model
-# (suppress warning 'Adaptation incomplete' due to n.adapt = 20)
-fit <-
-  suppressWarnings(crossnma(mod, n.adapt = 20,
-    n.iter = 50, thin = 1, n.chains = 3))
+set.seed(1909)
+fit <- crossnma(mod)
 
-# Trace plot of MCMC output
+# Trace plot of model parameters
 plot(fit)
+}
 
 }
 \seealso{

@@ -2,14 +2,13 @@
 % Please edit documentation in R/heatplot.crossnma.R
 \name{heatplot.crossnma}
 \alias{heatplot.crossnma}
-\alias{heatplot}
 \title{Heat Plot}
 \usage{
 \method{heatplot}{crossnma}(
   x,
   median = TRUE,
-  exp = TRUE,
-  order = NULL,
+  backtransf = x$model$backtransf,
+  seq = NULL,
   low.colour = "red",
   mid.colour = "white",
   high.colour = "springgreen4",
@@ -19,11 +18,10 @@
   size = 6,
   size.trt = 20,
   size.axis = 12,
-  digits = 2,
+  digits = gs("digits.forest"),
+  exp = backtransf,
   ...
 )
-
-heatplot(x, ...)
 }
 \arguments{
 \item{x}{An object created with \code{\link{crossnma}}.}
@@ -31,10 +29,12 @@ heatplot(x, ...)
 \item{median}{A logical indicating whether to use the median
 (default) or mean to measure relative treatment effects.}
 
-\item{exp}{If TRUE (default), odds ratios are displayed. If FALSE,
-log odds ratios will be presented.}
+\item{backtransf}{A logical indicating whether results should be
+back transformed. If \code{backtransf = TRUE}, results for
+\code{sm = "OR"} are presented as odds ratios rather than log
+odds ratios, for example.}
 
-\item{order}{A vector of treatment names (character) representing
+\item{seq}{A vector of treatment names (character) representing
 the order in which to display these treatments.}
 
 \item{low.colour}{A string indicating the colour of low relative
@@ -75,24 +75,26 @@ left of the plot.}
 \item{digits}{The number of digits to be used when displaying the
 results.}
 
+\item{exp}{Deprecated argument (replaced by \code{backtransf}).}
+
 \item{\dots}{Additional arguments (ignored at the moment).}
 }
 \value{
 League heat plot, where a color scale is used to represent the
-relative treatment effects.
+values of relative treatment effects.
 }
 \description{
 Produces a heat plot that contain point estimates of relative
-effects for all possible pairs of treatments along with 95\%
-credible intervals obtained with the quantile method.
+effects for all possible pairs of treatments along with credible
+intervals obtained with the quantile method.
 }
 \examples{
+\dontrun{
 # We conduct a network meta-analysis assuming a random-effects
-# model.
-# The data comes from randomized-controlled trials and
+# model. The data comes from randomized-controlled trials and
 # non-randomized studies (combined naively)
 head(ipddata) # participant-level data
-head(stddata) # study-level data
+stddata # study-level data
 
 # Create a JAGS model
 mod <- crossnma.model(treat, id, relapse, n, design,
@@ -100,13 +102,12 @@ mod <- crossnma.model(treat, id, relapse, n, design,
   reference = "A", trt.effect = "random", method.bias = "naive")
 
 # Fit JAGS model
-# (suppress warning 'Adaptation incomplete' due to n.adapt = 20)
-fit <-
-  suppressWarnings(crossnma(mod, n.adapt = 20,
-    n.iter = 50, thin = 1, n.chains = 3))
+set.seed(1909)
+fit <- crossnma(mod)
 
 # Create a heat plot
 heatplot(fit)
+}
 
 }
 \seealso{
@@ -115,3 +116,4 @@ heatplot(fit)
 \author{
 Tasnim Hamza \email{tasnim.hamza@ispm.unibe.ch}
 }
+\keyword{hplot}

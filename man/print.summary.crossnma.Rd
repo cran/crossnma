@@ -5,7 +5,7 @@
 \title{Print summary of cross-design & -format network meta-analysis or
 regression}
 \usage{
-\method{print}{summary.crossnma}(x, digits = 3, ...)
+\method{print}{summary.crossnma}(x, digits = gs("digits"), ...)
 }
 \arguments{
 \item{x}{An object of class \code{crossnma}.}
@@ -19,16 +19,18 @@ value is 3.}
 No return value (print function).
 }
 \description{
-Print summary results for cross-design and cross-format network
-meta-analysis or meta-regression
+Print results of cross-design and cross-format network
+meta-analysis or meta-regression. In addition, the call used to
+create the JAGS model is printed.
 }
 \examples{
+\dontrun{
 # We conduct a network meta-analysis assuming a random-effects
 # model.
 # The data comes from randomized-controlled trials and
 # non-randomized studies (combined naively)
 head(ipddata) # participant-level data
-head(stddata) # study-level data
+stddata # study-level data
 
 # Create a JAGS model
 mod <- crossnma.model(treat, id, relapse, n, design,
@@ -36,19 +38,19 @@ mod <- crossnma.model(treat, id, relapse, n, design,
   reference = "A", trt.effect = "random", method.bias = "naive")
 
 # Fit JAGS model
-# (suppress warning 'Adaptation incomplete' due to n.adapt = 20)
-fit <-
-  suppressWarnings(crossnma(mod, n.adapt = 20,
-    n.iter = 50, thin = 1, n.chains = 3))
+set.seed(1909)
+fit <- crossnma(mod)
 
 # Display the output (with 5 digits)
 print(summary(fit), digits = 5)
+}
 
 }
 \seealso{
 \code{\link{summary.crossnma}}
 }
 \author{
-Tasnim Hamza \email{tasnim.hamza@ispm.unibe.ch}
+Tasnim Hamza \email{tasnim.hamza@ispm.unibe.ch}, Guido
+  Schwarzer \email{guido.schwarzer@uniklinik-freiburg.de}
 }
 \keyword{print}
