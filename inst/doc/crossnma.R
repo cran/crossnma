@@ -1,4 +1,4 @@
-## ---- include = FALSE---------------------------------------------------------
+## ----include = FALSE----------------------------------------------------------
 knitr::opts_chunk$set(
   collapse = TRUE,
   comment = "#>",
@@ -24,22 +24,24 @@ stddata
 # JAGS model: code + data
 mod1 <- crossnma.model(treat, id, relapse, n, design,
   prt.data = ipddata, std.data = stddata,
-  trt.effect = "random",
   #---------- bias adjustment ----------
   method.bias = "naive",
   #---------- assign a prior ----------
-  prior.tau.trt = "dunif(0, 3)"
+  prior.tau.trt = "dunif(0, 3)",
+  #---------- SUCRA ----------
+  sucra = TRUE, small.values = "desirable"
   )
 
-## ---- fig.width=4.5, fig.height=5,fig.show='hold',fig.align='center'----------
-netgraph(mod1, cex.points = 7, adj = 0.5, plastic = FALSE)
+## ----fig.width=4.5, fig.height=5,fig.show='hold',fig.align='center'-----------
+netgraph(mod1, cex.points = n.trts, adj = 0.5, plastic = FALSE,
+ number = TRUE, pos.number.of.studies = c(0.5, 0.4, 0.5, 0.5, 0.6, 0.5))
 
 ## -----------------------------------------------------------------------------
 # Run JAGS
-jagsfit1 <- crossnma(mod1, n.iter = 5000, n.burnin = 2000, n.thin = 1)
+jagsfit1 <- crossnma(mod1, n.iter = 5000, n.burnin = 2000, thin = 1)
 jagsfit1
 
-## ---- echo = FALSE------------------------------------------------------------
+## ----echo = FALSE-------------------------------------------------------------
 knitr::kable(summary(jagsfit1, backtransf = FALSE), digits = 3)
 
 ## -----------------------------------------------------------------------------
@@ -50,7 +52,6 @@ plot(jagsfit1)
 # JAGS model: code + data
 mod2 <- crossnma.model(treat, id, relapse, n, design,
   prt.data = ipddata, std.data = stddata,
-  trt.effect = "random",
   #---------- bias adjustment ----------
   method.bias = "naive",
   #----------  meta-regression ----------
@@ -60,22 +61,22 @@ mod2 <- crossnma.model(treat, id, relapse, n, design,
 
 ## -----------------------------------------------------------------------------
 # Run JAGS
-jagsfit2 <- crossnma(mod2, n.iter = 5000, n.burnin = 2000, n.thin = 1)
+jagsfit2 <- crossnma(mod2, n.iter = 5000, n.burnin = 2000, thin = 1)
 
-## ---- echo = FALSE------------------------------------------------------------
+## ----echo = FALSE-------------------------------------------------------------
 knitr::kable(summary(jagsfit2, backtransf = FALSE), digits = 3)
 
-## ---- fig.width=6, fig.height=5,fig.show='hold',fig.align='center'------------
+## ----fig.width=6, fig.height=5,fig.show='hold',fig.align='center'-------------
 league(jagsfit2, cov1.value = 38, digits = 2)
 
-## ---- fig.width=6, fig.height=5,fig.show='hold',fig.align='center'------------
+## ----fig.width=6, fig.height=5,fig.show='hold',fig.align='center'-------------
 league(jagsfit2, cov1.value = 38, digits = 2, direction = "long")
 
 ## -----------------------------------------------------------------------------
 # JAGS model: code + data
 mod3 <- crossnma.model(treat, id, relapse, n, design,
   prt.data = ipddata, std.data = stddata,
-  reference = "D", trt.effect = "random",
+  reference = "D",
   #----------  meta-regression ----------
   cov1 = age,
   split.regcoef = FALSE,
@@ -84,14 +85,14 @@ mod3 <- crossnma.model(treat, id, relapse, n, design,
   run.nrs.trt.effect= "common",
   run.nrs.var.infl = 0.6, run.nrs.mean.shift = 0,
   run.nrs.n.iter = 10000, run.nrs.n.burnin = 4000,
-  run.nrs.n.thin = 1, run.nrs.n.chains = 2
+  run.nrs.thin = 1, run.nrs.n.chains = 2
   )
 
 ## -----------------------------------------------------------------------------
 # Run JAGS
-jagsfit3 <- crossnma(mod3, n.iter = 5000, n.burnin = 2000, n.thin = 1)
+jagsfit3 <- crossnma(mod3, n.iter = 5000, n.burnin = 2000, thin = 1)
 
-## ---- fig.width=6, fig.height=5,fig.show='hold',fig.align='center'------------
+## ----fig.width=6, fig.height=5,fig.show='hold',fig.align='center'-------------
 heatplot(jagsfit3, cov1.value = 38,
   size = 6, size.trt = 20, size.axis = 12)
 
@@ -99,7 +100,6 @@ heatplot(jagsfit3, cov1.value = 38,
 # JAGS model: code + data
 mod4 <- crossnma.model(treat, id, relapse, n, design,
   prt.data = ipddata, std.data = stddata,
-  trt.effect = "random",
   #---------- bias adjustment ----------
   method.bias = "adjust1",
   bias.type = "add",
@@ -112,16 +112,15 @@ mod4 <- crossnma.model(treat, id, relapse, n, design,
 
 ## -----------------------------------------------------------------------------
 # Run JAGS
-jagsfit4 <- crossnma(mod4, n.iter = 5000, n.burnin = 2000, n.thin = 1)
+jagsfit4 <- crossnma(mod4, n.iter = 5000, n.burnin = 2000, thin = 1)
 
-## ---- echo = FALSE------------------------------------------------------------
+## ----echo = FALSE-------------------------------------------------------------
 knitr::kable(summary(jagsfit4, backtransf = FALSE), digits = 3)
 
 ## -----------------------------------------------------------------------------
 # JAGS model: code + data
 mod5 <- crossnma.model(treat, id, relapse, n, design,
   prt.data = ipddata, std.data = stddata,
-  trt.effect = "random",
   #---------- bias adjustment ----------
   method.bias = "adjust2",
   bias.type = "add",
@@ -132,11 +131,11 @@ mod5 <- crossnma.model(treat, id, relapse, n, design,
 
 ## -----------------------------------------------------------------------------
 # Run JAGS
-jagsfit5 <- crossnma(mod5, n.iter = 5000, n.burnin = 2000, n.thin = 1)
+jagsfit5 <- crossnma(mod5, n.iter = 5000, n.burnin = 2000, thin = 1)
 
-## ---- echo = FALSE------------------------------------------------------------
+## ----echo = FALSE-------------------------------------------------------------
 knitr::kable(summary(jagsfit5, backtransf = FALSE), digits = 3)
 
-## ---- echo = FALSE, message = FALSE-------------------------------------------
+## ----echo = FALSE, message = FALSE--------------------------------------------
 tools::compactPDF(path = ".", gs_quality = "ebook")
 
